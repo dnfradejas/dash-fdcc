@@ -92,8 +92,8 @@ def patient_loadlist(pathname, searchterm):
                     p.firstname || ' ' || p.lastname as Name, 
                     d.firstname || ' ' || d.lastname as Doctor, 
                     STRING_AGG(pr.procedure_name, ', ') as Procedures,
-                    a.total_cost, 
-                    a.date as appointment_date
+                    TO_CHAR(a.date, 'Month DD, YYYY') as appointment_date,
+                    a.total_cost
 
                 FROM 
                     appointments as a
@@ -108,12 +108,12 @@ def patient_loadlist(pathname, searchterm):
                 
                 WHERE (p.firstname ILIKE %s OR p.lastname ILIKE %s) 
                 GROUP BY 
-                    Name, Doctor, a.total_cost, appointment_date
+                    Name, Doctor, appointment_date, a.total_cost
                 
 
         """
         values = []
-        cols = ['Name', 'Doctor', 'Procedures', 'Cost', 'Appointment Date']
+        cols = ['Name', 'Doctor', 'Procedures', 'Appointment', 'Cost']
 
         if searchterm:
             
@@ -123,9 +123,9 @@ def patient_loadlist(pathname, searchterm):
             values += [f"%{searchterm}%", f"%{searchterm}%"]
 
         df = db.querydatafromdatabase(sql, values, cols)
-        df = df[['Name', 'Doctor', 'Procedures', 'Cost', 'Appointment Date']]
+        df = df[['Name', 'Doctor', 'Procedures', 'Appointment', 'Cost',]]
         df['Cost'] = df['Cost'].apply(lambda x: f'₱ {x:,.2f}')
-        df = df.sort_values('Appointment Date', ascending=False)
+        df = df.sort_values('Appointment', ascending=False)
         
         table = dbc.Table.from_dataframe(df, striped=True, bordered=True,
                 hover=True, size='sm')

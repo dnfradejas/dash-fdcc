@@ -87,12 +87,12 @@ def patient_loadlist(pathname, searchterm):
             return [dbc.Table()]
         # 1. Obtain records from the DB via SQL
         # 2. Create the html element to return to the Div
-        sql = """ SELECT firstname as Firstname, lastname as Lastname,  patient_id as ID
+        sql = """ SELECT firstname as Firstname, lastname as Lastname, TO_CHAR(birthday, 'Month DD, YYYY'), patient_id as ID
             FROM patients 
             WHERE 
         """
         values = []
-        cols = ['Firstname', 'Lastname', 'ID']
+        cols = ['Firstname', 'Lastname', 'Birthday', 'ID']
 
         if searchterm:
             # We use the operator ILIKE for pattern-matching
@@ -116,7 +116,7 @@ def patient_loadlist(pathname, searchterm):
                     )
                 ]
             df['Action'] = buttons
-            df = df[['Firstname', 'Lastname', 'Action']]
+            df = df[['Firstname', 'Lastname', 'Birthday', 'Action']]
             table = dbc.Table.from_dataframe(df, striped=True, bordered=True,
                     hover=True, size='sm')
             return [table]
